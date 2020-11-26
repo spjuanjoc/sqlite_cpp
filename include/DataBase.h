@@ -1,7 +1,8 @@
 #pragma once
 
-#include "sqlite3.h"
 #include "IDataBase.h"
+#include "fmt/format.h"
+#include "sqlite3.h"
 #include <iostream>
 
 class DataBase : public IDataBase
@@ -54,18 +55,20 @@ public:
 
   int createTable(const std::string& name)
   {
-    std::string drop{"DROP TABLE "};
-    drop.append(name);
-    drop.append(";");
+    std::string drop = fmt::format( "DROP TABLE {0}", name);
+    std::cout << "drop: " << drop << '\n';
 
     if (runQuery(drop.c_str()) != SQLITE_OK)
     {
       sqlite3_free(errorMessage_);
     }
 
-    std::string create{"CREATE TABLE "};
-    create.append(name);
-    create.append(" (Col1 varchar2(255), Col2 int);");
+    std::string create = fmt::format(
+      "CREATE TABLE {0} "
+      "(Col1 varchar2(255), Col2 int);",
+      name);
+
+    std::cout << "create: " << create << '\n';
 
     int result = runQuery(create.c_str());
 
@@ -85,9 +88,17 @@ public:
 
   int insertInto(const std::string& name)
   {
-    std::string insert{"INSERT INTO "};
-    insert.append(name);
-    insert.append(" VALUES('first',10);");
+    std::string col1{"value10"};
+    int col2 = 10;
+
+    std::string insert = fmt::format(
+      "INSERT INTO {0} "
+      "VALUES('{1}',{2});",
+      name,
+      col1,
+      col2);
+
+    std::cout << "insert: " << insert << '\n';
 
     int result = runQuery(insert.c_str());
 
@@ -103,10 +114,10 @@ public:
   int getAll(const std::string& name) override
   {
     std::cout << "Values:\n";
-    std::string select{"SELECT * FROM "};
-    select.append(name);
+    std::string query = fmt::format("SELECT * FROM {0}", name);
+    std::cout << "query: " << query << '\n';
 
-    int result = runQuery(select.c_str());
+    int result = runQuery(query.c_str());
 
     if (result != SQLITE_OK)
     {

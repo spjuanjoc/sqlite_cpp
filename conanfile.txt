@@ -1,5 +1,6 @@
 [requires]
-sqlite3/3.33.0
+sqlite3/3.33.0    # SQLite
+fmt/6.2.0         # format
 
 [generators]
 cmake
