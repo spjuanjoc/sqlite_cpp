@@ -52,9 +52,9 @@ target_compile_options(${PROJECT_NAME} INTERFACE ${PROJECT_OPTIONS})
 target_sources(${PROJECT_NAME} PUBLIC ${SOURCES} src/main.cpp)
 
 # Get the headers
-#set(INCLUDES include)
-#include_directories(PUBLIC ${INCLUDES})
-#target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDES})
+set(INCLUDES include)
+include_directories(PUBLIC ${INCLUDES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDES})
 
 # Custom Options
 if(ENABLE_PCH)
