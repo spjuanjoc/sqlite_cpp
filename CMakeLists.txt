@@ -39,7 +39,6 @@ endif()
 
 # Sources
 set(SOURCES
-#    src/URIHandler.cpp
     )
 
 # ---
@@ -71,10 +70,11 @@ endif()
 if (ENABLE_CONAN)
   message("-- Conan enabled")
   include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  conan_basic_setup(TARGETS)
+#  conan_basic_setup()
 #  target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS})
-  message("-- Conan libs: ${CONAN_LIBS}")
+  conan_basic_setup(TARGETS)
   conan_target_link_libraries(${PROJECT_NAME} ${CONAN_LIBS} )
+  message("-- Conan libs: ${CONAN_LIBS}")
 endif ()
 
 
