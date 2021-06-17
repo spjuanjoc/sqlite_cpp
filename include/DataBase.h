@@ -1,57 +1,33 @@
 #pragma once
 
 #include "IDataBase.h"
-#include "fmt/format.h"
-#include "sqlite3.h"
+#include <fmt/format.h>
+#include <sqlite3.h>
 #include <iostream>
 
 class DataBase : public IDataBase
 {
-private:
-  int         dbResult_     = 0;
-  const char* dbName_       = "../test.db";
-  sqlite3*    dbHandler_    = nullptr;
-  char*       errorMessage_ = nullptr;
-  void*       data_         = nullptr;
-
-protected:
-  DataBase()
-  {
-    std::cout << "database open\n";
-    dbResult_ = sqlite3_open(dbName_, &dbHandler_);
-  }
-
-  static int printCallback(void* data, int rows, char** values, char** columnName)
-  {
-    for (int i = 0; i < rows; ++i)
-    {
-      std::cout << columnName[i] << " : " << values[i] << '\n';
-    }
-    return 0;
-  };
-
-  int runQuery(const char * query)
-  {
-    return sqlite3_exec(dbHandler_, query, printCallback, static_cast<void*>(data_), &errorMessage_);
-  }
 
 public:
-  DataBase(DataBase const&) = delete;
-  DataBase(DataBase&&)      = delete;
-  DataBase& operator=(DataBase const&) = delete;
-  DataBase& operator=(DataBase&&) = delete;
-
-  ~DataBase()
-  {
-    std::cout << "database closed\n";
-    sqlite3_close(dbHandler_);
-  }
 
   static DataBase& instance()
   {
     static DataBase database;
     return database;
   }
+
+  ~DataBase() override
+  {
+    std::cout << "database closed\n";
+    sqlite3_close(m_db_handler);
+  }
+
+
+  DataBase(DataBase const&) = delete;
+  DataBase(DataBase&&)      = delete;
+  DataBase& operator=(DataBase const&) = delete;
+  DataBase& operator=(DataBase&&) = delete;
+
 
   int createTable(const std::string& name)
   {
@@ -60,7 +36,7 @@ public:
 
     if (runQuery(drop.c_str()) != SQLITE_OK)
     {
-      sqlite3_free(errorMessage_);
+      sqlite3_free(m_error_message);
     }
 
     std::string create = fmt::format(
@@ -74,8 +50,8 @@ public:
 
     if (result != SQLITE_OK)
     {
-      std::cerr << "SQL error: " << errorMessage_ << '\n';
-      sqlite3_free(errorMessage_);
+      std::cerr << "SQL error: " << m_error_message << '\n';
+      sqlite3_free(m_error_message);
     }
     else
     {
@@ -104,8 +80,8 @@ public:
 
     if (result != SQLITE_OK)
     {
-      std::cerr << "SQL error: " << errorMessage_ << '\n';
-      sqlite3_free(errorMessage_);
+      std::cerr << "SQL error: " << m_error_message << '\n';
+      sqlite3_free(m_error_message);
     }
 
     return result;
@@ -121,10 +97,38 @@ public:
 
     if (result != SQLITE_OK)
     {
-      std::cerr << "SQL error: " << errorMessage_ << '\n';
-      sqlite3_free(errorMessage_);
+      std::cerr << "SQL error: " << m_error_message << '\n';
+      sqlite3_free(m_error_message);
     }
 
     return result;
   }
+
+protected:
+  DataBase()
+  {
+    std::cout << "database open\n";
+    m_db_result = sqlite3_open(m_db_name, &m_db_handler);
+  }
+
+  static int printCallback([[maybe_unused]]void* data, int rows, char** values, char** columnName)
+  {
+    for (int i = 0; i < rows; ++i)
+    {
+      std::cout << columnName[i] << " : " << values[i] << '\n';
+    }
+    return 0;
+  };
+
+  int runQuery(const char * query)
+  {
+    return sqlite3_exec(m_db_handler, query, printCallback, m_data, &m_error_message);
+  }
+
+private:
+  int         m_db_result     = 0;
+  const char* m_db_name       = "../test.db";
+  sqlite3*    m_db_handler    = nullptr;
+  char*       m_error_message = nullptr;
+  void*       m_data          = nullptr;
 };

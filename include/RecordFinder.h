@@ -9,9 +9,6 @@
 
 class RecordFinder
 {
-private:
-  IDataBase& db;
-
 public:
   int totalValue(const std::vector<std::string>& values)
   {
@@ -19,9 +16,14 @@ public:
 
     for (const auto& it : values)
     {
-//      result += db.getValue(it);
+      std::cout << it << '\n';
+//      result += m_db.getValue(it);
     }
 
     return result;
   }
+
+private:
+  static IDataBase& m_db;
+
 };
